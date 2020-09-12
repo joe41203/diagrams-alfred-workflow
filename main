@@ -72,22 +72,34 @@ class DiagramPngFinder
   end
 end
 
-all_import_codes = Dir.glob('**/*', File::FNM_DOTMATCH, base: '.').flat_map do |file|
-  file_path = File.join('.', file)
-  DiagramFile.new(file_path).to_import_codes
-end.compact
-
-alfred_format = {
-  items: all_import_codes.map do |code|
-    {
-      title: code[:code].gsub(".", " "),
-      subtitle: code[:code],
-      arg: code[:code],
-      icon: {
-        path: DiagramPngFinder.call(code[:sub_dir_name], code[:name])
+def build_json
+  return if File.exist?("alfred.json")
+  all_import_codes = Dir.glob('**/*', File::FNM_DOTMATCH, base: '.').flat_map do |file|
+    file_path = File.join('.', file)
+    DiagramFile.new(file_path).to_import_codes
+  end.compact
+  
+  alfred_format = {
+    items: all_import_codes.map do |code|
+      {
+        title: code[:code].gsub(".", " "),
+        subtitle: code[:code],
+        arg: code[:code],
+        icon: {
+          path: DiagramPngFinder.call(code[:sub_dir_name], code[:name])
+        }
       }
-    }
-  end
-}
+    end
+  }
 
-puts alfred_format.to_json
+  open("./alfred.json", 'w') do |io|
+    JSON.dump(alfred_format, io)
+  end
+end
+
+build_json
+
+File.open("alfred.json") do |j|
+  json = JSON.load(j)
+  puts JSON.generate(json)
+end
