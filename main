@@ -15,7 +15,11 @@ class DiagramFile
     grep_diagram_class_names.map do |class_name|
       chomped_class_name = class_name.chomp
       name =  chomped_class_name.gsub("class ", "").gsub(/\(\w.*\:/, "")
-      "import #{import_file_path} from #{name}"
+      {
+        code: "import #{import_file_path} from #{name}",
+        name: name,
+        sub_dir_name: sub_dir_name
+      }
     end
   end
 
@@ -23,6 +27,10 @@ class DiagramFile
 
   def import_file_path
     @file_path.gsub(".py", "").gsub("./diagrams", "").gsub("/", ".").gsub(".diagrams", "diagrams")
+  end
+
+  def sub_dir_name
+    @file_path.gsub(".py", "").gsub("./diagrams", "").split("/").last
   end
 
   def grep_diagram_class_names
@@ -40,9 +48,27 @@ class DiagramFile
   def py?
     File.extname(@file_path) == ".py"
   end
+end
 
-  def png?
-    File.extname(@file_path) == ".png"
+class DiagramPngFinder
+  def self.call(sub_dir_name, diagram_name)
+    Dir.glob("./diagrams/resources/**/#{sub_dir_name}/#{dasherize(underscore(diagram_name))}.png").first
+  end
+
+  private
+
+  def self.underscore(camel_cased_word)
+    return camel_cased_word unless /[A-Z-]|::/.match?(camel_cased_word)
+    word = camel_cased_word.to_s.gsub("::", "/")
+    word.gsub!(/([A-Z\d]+)([A-Z][a-z])/, '\1_\2')
+    word.gsub!(/([a-z\d])([A-Z])/, '\1_\2')
+    word.tr!("-", "_")
+    word.downcase!
+    word
+  end
+
+  def self.dasherize(underscored_word)
+    underscored_word.tr("_", "-")
   end
 end
 
@@ -54,9 +80,12 @@ end.compact
 alfred_format = {
   items: all_import_codes.map do |code|
     {
-      title: code.gsub(".", " "),
-      subtitle: code,
-      arg: code,
+      title: code[:code].gsub(".", " "),
+      subtitle: code[:code],
+      arg: code[:code],
+      icon: {
+        path: DiagramPngFinder.call(code[:sub_dir_name], code[:name])
+      }
     }
   end
 }
