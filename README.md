@@ -1,5 +1,9 @@
 # diagrams-alfred-workflow
 
+## Demo
+
+![](./demo.gif)
+
 ## How to setup
 
 ```
