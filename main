@@ -1,0 +1,64 @@
+#!/usr/bin/env ruby
+
+require 'json'
+
+class DiagramFile
+  def initialize(file_path)
+    @file_path = file_path 
+  end
+
+  def to_import_codes
+    return nil unless py?
+    return nil if init_file?
+    return nil if test_file?
+    return nil if grep_diagram_class_names.empty?
+    grep_diagram_class_names.map do |class_name|
+      chomped_class_name = class_name.chomp
+      name =  chomped_class_name.gsub("class ", "").gsub(/\(\w.*\:/, "")
+      "import #{import_file_path} from #{name}"
+    end
+  end
+
+  private
+
+  def import_file_path
+    @file_path.gsub(".py", "").gsub("./diagrams", "").gsub("/", ".").gsub(".diagrams", "diagrams")
+  end
+
+  def grep_diagram_class_names
+    @grep_diagram_class_names ||= File.open(@file_path, "r").grep(/class /).grep(/\):/).grep_v(/class _/).to_a
+  end
+
+  def test_file?
+    @file_path.include?("test")
+  end
+
+  def init_file?
+    @file_path.include?("__init__.py")
+  end
+
+  def py?
+    File.extname(@file_path) == ".py"
+  end
+
+  def png?
+    File.extname(@file_path) == ".png"
+  end
+end
+
+all_import_codes = Dir.glob('**/*', File::FNM_DOTMATCH, base: '.').flat_map do |file|
+  file_path = File.join('.', file)
+  DiagramFile.new(file_path).to_import_codes
+end.compact
+
+alfred_format = {
+  items: all_import_codes.map do |code|
+    {
+      title: code.gsub(".", " "),
+      subtitle: code,
+      arg: code,
+    }
+  end
+}
+
+puts alfred_format.to_json
