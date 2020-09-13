@@ -1,3 +1,8 @@
+upgrade:
+	git submodule foreach git pull origin master
+	rm alfred.json
+	./main
+	make install
 
 install:
 	zip -r diagrams ./
