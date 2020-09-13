@@ -1,7 +1,6 @@
 
-build:
-	-rm diagrams.alfredworkflow
+install:
 	zip -r diagrams ./
 	mv diagrams.zip diagrams.alfredworkflow
-	cp diagrams.alfredworkflow ~/Desktop/
+	mv diagrams.alfredworkflow ~/Desktop/diagrams.alfredworkflow
 	open ~/Desktop/diagrams.alfredworkflow
