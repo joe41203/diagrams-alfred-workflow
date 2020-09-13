@@ -4,6 +4,8 @@
 <dict>
 	<key>bundleid</key>
 	<string>joe.diagrams.alfred.workflow</string>
+	<key>category</key>
+	<string>Tools</string>
 	<key>connections</key>
 	<dict>
 		<key>A3AA7F67-F16A-469B-9142-5357819EE871</key>
