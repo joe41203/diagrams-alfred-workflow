@@ -16,7 +16,7 @@ class DiagramFile
       chomped_class_name = class_name.chomp
       name =  chomped_class_name.gsub("class ", "").gsub(/\(\w.*\:/, "")
       {
-        code: "import #{import_file_path} from #{name}",
+        code: "from #{import_file_path} import #{name}",
         name: name,
         sub_dir_name: sub_dir_name
       }
